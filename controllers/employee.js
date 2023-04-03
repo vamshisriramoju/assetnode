@@ -6,6 +6,7 @@ const Employee = require("../models/employee");
 exports.addEmployee = async (req, res) => {
   try {
     const userId = req.user.userId;
+    console.log("userId", userId,req);
 
     const {
       employeeName,
@@ -15,6 +16,7 @@ exports.addEmployee = async (req, res) => {
       dateOfJoining,
       contactNo,
       personalEmail,
+      officialEmail,
     } = req.body;
 
     const employee = new Employee({
@@ -25,7 +27,8 @@ exports.addEmployee = async (req, res) => {
       dateOfJoining,
       contactNo,
       personalEmail,
-      createdBy: userId,
+      officialEmail,
+      createdBy: userId
     });
 
     await employee.save();

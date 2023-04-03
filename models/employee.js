@@ -15,6 +15,7 @@ const employeeSchema = new mongoose.Schema({
   dateOfJoining: { type: String, required: true },
   contactNo: { type: Number, required: true },
   personalEmail: { type: String, required: true },
+  officialEmail: { type: String, required: true },
   assets:[assetSchema],
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   createdAt: { type: Date, default: Date.now },
