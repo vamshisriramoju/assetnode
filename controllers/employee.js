@@ -1,19 +1,57 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const Employee = require("../models/employee");
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { ObjectId } = require("mongodb");
 
+// create a new employee here we need to give a employee id 
+// exports.addEmployee = async (req, res) => {
+//   try {
+//     const userId = req.user.userId;
+//     console.log("userId", userId,req);
 
-// create a new employee
+//     const {
+//       employeeName,
+//       employeeId,
+//       designation,
+//       department,
+//       dateOfJoining,
+//       contactNo,
+//       personalEmail,
+//       officialEmail,
+//     } = req.body;
+
+//     const date = new Date(dateOfJoining); // Create a new date object from the string
+//     const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); // Format the date as a string in the desired format
+
+//     const employee = new Employee({
+//       employeeName,
+//       employeeId,
+//       designation,
+//       department,
+//       dateOfJoining : formattedDate,
+//       contactNo,
+//       personalEmail,
+//       officialEmail,
+//       createdBy: userId
+//     });
+
+//     await employee.save();
+
+//     res.status(201).json(employee);
+//   } catch (error) {
+//     console.error(error);
+//     res.sendStatus(500);
+//   }
+// };
+
 exports.addEmployee = async (req, res) => {
   try {
     const userId = req.user.userId;
-    console.log("userId", userId,req);
+    //console.log("userId", userId,req);
 
     const {
       employeeName,
-      employeeId,
       designation,
       department,
       dateOfJoining,
@@ -23,18 +61,42 @@ exports.addEmployee = async (req, res) => {
     } = req.body;
 
     const date = new Date(dateOfJoining); // Create a new date object from the string
-    const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); // Format the date as a string in the desired format
+    const formattedDate = date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }); // Format the date as a string in the desired format
+
+    const initials = employeeName
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase(); // Get the initials of the employee name
+
+    const lastEmployee = await Employee.findOne(
+      {},
+      {},
+      { sort: { employeeId: -1 } }
+    );
+    console.log("lastEmployee:", lastEmployee);
+
+     // Generate the next sequence number
+    const sequence = lastEmployee
+      ? parseInt(lastEmployee.employeeId.substring(3)) + 1
+      : 1;
+
+    const employeeId = `emp${sequence.toString().padStart(4, "0")}`; // Concatenate the sequence number with the 'emp' prefix to create the employee ID
 
     const employee = new Employee({
       employeeName,
       employeeId,
       designation,
       department,
-      dateOfJoining : formattedDate,
+      dateOfJoining: formattedDate,
       contactNo,
       personalEmail,
       officialEmail,
-      createdBy: userId
+      createdBy: userId,
     });
 
     await employee.save();
@@ -97,30 +159,33 @@ exports.deleteEmployee = async (req, res) => {
 
 // get all employees with pagination and limit
 exports.getEmployees = async (req, res) => {
-  console.log('request', req.user)
+  console.log("request", req.user);
   // const page = parseInt(req.query.page) || 1; // Current page number
   // const limit = parseInt(req.query.limit) || 10; // Number of records per page
   const page = parseInt(req.body.page) || 1; // Current page number
   const limit = parseInt(req.body.limit) || 20; // Number of records per page
 
   try {
-    const count = await Employee.countDocuments({createdBy:new ObjectId(req.user.userId)}); // Total number of records
-    const employees = await Employee.find({createdBy:new ObjectId(req.user.userId)})
-    .skip((page - 1) * limit) // Skip records
+    const count = await Employee.countDocuments({
+      createdBy: new ObjectId(req.user.userId),
+    }); // Total number of records
+    const employees = await Employee.find({
+      createdBy: new ObjectId(req.user.userId),
+    })
+      .skip((page - 1) * limit) // Skip records
       .limit(limit); // Limit records
 
-      res.json({
-        total: count,
-        totalPages: Math.ceil(count / limit),
-        currentPage: page,
-        employees: employees
-      });
+    res.json({
+      total: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+      employees: employees,
+    });
   } catch (error) {
     console.error(error);
     res.sendStatus(500);
   }
 };
-
 
 // getEmployees in ascending order
 // exports.getEmployees = async (req, res) => {
@@ -155,7 +220,6 @@ exports.getEmployees = async (req, res) => {
 //     res.sendStatus(500);
 //   }
 // };
-
 
 exports.getEmployeeById = async (req, res) => {
   try {
@@ -211,7 +275,6 @@ exports.allocateAsset = async (req, res) => {
 //     res.status(500).send({ message: "Server error" });
 //   }
 // };
-
 
 exports.deAllocateAsset = async (req, res) => {
   try {
