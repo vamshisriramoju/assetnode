@@ -5,9 +5,8 @@ const mongoose = require("mongoose");
 const userRoutes = require("./routes/userRoutes");
 const employeeRoutes = require("./routes/employeeRoutes");
 
-const cors = require('cors');
-const bodyParser = require('body-parser');
-
+const cors = require("cors");
+const bodyParser = require("body-parser");
 
 mongoose.connect("mongodb://localhost/myassetnew", {
   useNewUrlParser: true,
@@ -20,8 +19,10 @@ app.use(express.json());
 app.use(cors());
 app.use(bodyParser.json());
 
-app.get('/api/test', (req, res) => {
-  res.send('Hello Welcome to asset management !');
+app.get("/api/test", (req, res) => {
+  //res.send('Hello Welcome to asset management !');
+  const message = "Hello Welcome to asset management!";
+  res.send(`<h1 style="text-align: center;">${message}</h1>`);
 });
 
 app.use("/api/users", userRoutes);
