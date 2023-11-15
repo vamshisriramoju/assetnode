@@ -3,11 +3,20 @@ const jwt = require("jsonwebtoken");
 const Employee = require("../models/employee");
 const mongoose = require("mongoose");
 const { ObjectId } = require("mongodb");
+const Joi = require('joi');
+const { employeeSchema } = require('../validations/validation'); 
 
 exports.addEmployee = async (req, res) => {
   try {
     const userId = req.user.userId;
     //console.log("userId", userId,req);
+
+    //Validate the request body against the employee schema
+    const { error, value } = employeeSchema.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
 
     const {
       employeeName,
@@ -159,10 +168,9 @@ exports.getEmployeeById = async (req, res) => {
   }
 };
 
-// allocating a new asset
 exports.allocateAsset = async (req, res) => {
   try {
-    const employee = await Employee.findOneAndUpdate(
+        const employee = await Employee.findOneAndUpdate(
       { employeeId: req.body.employeeId },
       { $push: { assets: req.body.asset } },
       { new: true }
@@ -176,6 +184,7 @@ exports.allocateAsset = async (req, res) => {
     res.status(500).send({ message: "Server error" });
   }
 };
+
 
 // deallocating a new asset
 exports.deAllocateAsset = async (req, res) => {
